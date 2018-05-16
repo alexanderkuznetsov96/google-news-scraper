@@ -26,18 +26,41 @@ namespace GoogleNewsScraper
 
             var frontpageNewsSections = htmlDoc.DocumentNode.Descendants("div").Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Contains(SECTION_CLASS));
 
+            List<string> headers = new List<string>();
+            List<List<string>> allMainHeadlines = new List<List<string>>();
+
             foreach(var section in frontpageNewsSections)
             {
                 var header = section.Descendants().Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Contains(SECTION_HEADER_CLASS)).First().InnerText;
-                var mainCoverageHeaders = section.Descendants().Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Contains(MAIN_COVERAGE_CLASS));
+                var mainHeadlines = section.Descendants().Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Contains(MAIN_COVERAGE_CLASS));
 
+                headers.Add(header);
                 Console.WriteLine(header);
-                csv.Append(header + Environment.NewLine);
-                foreach(var mainCoverageHeader in mainCoverageHeaders)
+
+                allMainHeadlines.Add(new List<string>());
+                foreach(var headline in mainHeadlines)
                 {
-                    var mainCoverageHeaderText = WebUtility.HtmlDecode(mainCoverageHeader.InnerText);
-                    Console.WriteLine("\t" + mainCoverageHeaderText);
-                    csv.Append("\"" + mainCoverageHeaderText + "\"" + Environment.NewLine);
+                    var santizedHeadline = WebUtility.HtmlDecode(headline.InnerText);
+                    allMainHeadlines.Last().Add(santizedHeadline);
+                    Console.WriteLine("\t" + santizedHeadline);
+                }
+            }
+
+            foreach(var header in headers)
+            {
+                csv.Append(header + ",");
+            }
+            csv.Append(Environment.NewLine);
+
+            int maxHeadLines = allMainHeadlines.Select(x => x.Count).ToList().Max();
+            for(int i = 0; i < maxHeadLines; i++)
+            {
+                foreach(var sectionHeadlines in allMainHeadlines)
+                {
+                    if(i < sectionHeadlines.Count)
+                    {
+                        csv.Append('"' + sectionHeadlines[i] + '"' + ",");
+                    }
                 }
                 csv.Append(Environment.NewLine);
             }
