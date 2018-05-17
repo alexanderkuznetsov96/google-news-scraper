@@ -11,6 +11,7 @@ namespace GoogleNewsScraper
 {
     class Program
     {
+        [STAThread]
         static void Main(string[] args)
         {
             const string SECTION_CLASS = "WyeMbd";
@@ -22,7 +23,7 @@ namespace GoogleNewsScraper
 
             var URL = @"https://news.google.com/";
             HtmlWeb web = new HtmlWeb();
-            var htmlDoc = web.Load(URL);
+            var htmlDoc = web.LoadFromBrowser(URL);
 
             var frontpageNewsSections = htmlDoc.DocumentNode.Descendants("div").Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Contains(SECTION_CLASS));
 
